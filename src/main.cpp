@@ -1,8 +1,8 @@
 #include <Arduino.h>
 
 #define BITSIZE 14
-#define TOTAL_DIGITS (sizeof(digits) / sizeof(digits[0]))
-#define TOTAL_SEGMENTS (sizeof(segments) / sizeof(segments[0]))
+#define TOTAL_DIGITS 4
+#define TOTAL_SEGMENTS 7
 
 int segments[] = {12, 11, 10, 9, 8, 7, 6};
 int digits[] = {A1, A2, A3, A4};
@@ -13,19 +13,19 @@ void turnOffAllDigits();
 
 void setup()
 {
-  for (unsigned int i = 0; i < TOTAL_SEGMENTS; i++)
+  for (int i = 0; i < TOTAL_SEGMENTS; i++)
   {
     pinMode(segments[i], OUTPUT);
   }
 
-  for (unsigned int i = 0; i < TOTAL_DIGITS; i++)
+  for (int i = 0; i < TOTAL_DIGITS; i++)
   {
     pinMode(digits[i], OUTPUT);
   }
   Serial.begin(9600);
 }
 
-int count = 990;
+int count = 1980;
 void loop()
 {
   static uint32_t previousSecond = millis();
@@ -61,13 +61,7 @@ void displayDigit(int number)
 
     turnOffAllDigits();
 
-    if (i == 0)
-    {
-      Serial.println();
-      Serial.println();
-    }
-
-    for (unsigned int j = 0; j < TOTAL_SEGMENTS; j++)
+    for (int j = 0; j < TOTAL_SEGMENTS; j++)
     {
       digitalWrite(segments[j], digitSegments[digitNumber][j]);
     }
@@ -88,14 +82,12 @@ byte getDigit(int number, int position)
   char digitChar = binaryString[position];
   byte digitValue = digitChar - '0';
 
-  Serial.print(digitValue);
-
   return digitValue;
 }
 
 void turnOffAllDigits()
 {
-  for (unsigned int j = 0; j < sizeof(digits) / sizeof(digits[0]); j++)
+  for (unsigned int j = 0; j < TOTAL_DIGITS; j++)
   {
     digitalWrite(digits[j], HIGH);
   }
