@@ -1,29 +1,50 @@
 #include <Arduino.h>
 
-int segments[] = {7, 6, 5, 11, 10, 8, 9, 4};
+#define BITSIZE 14
+#define TOTAL_DIGITS (sizeof(digits) / sizeof(digits[0]))
+#define TOTAL_SEGMENTS (sizeof(segments) / sizeof(segments[0]))
+
+int segments[] = {12, 11, 10, 9, 8, 7, 6};
+int digits[] = {A1, A2, A3, A4};
 
 void displayDigit(int number);
+byte getDigit(int number, int position);
+void turnOffAllDigits();
 
 void setup()
 {
-  for (int i = 4; i <= 11; i++)
+  for (unsigned int i = 0; i < TOTAL_SEGMENTS; i++)
   {
-    digitalWrite(i, OUTPUT);
+    pinMode(segments[i], OUTPUT);
   }
+
+  for (unsigned int i = 0; i < TOTAL_DIGITS; i++)
+  {
+    pinMode(digits[i], OUTPUT);
+  }
+  Serial.begin(9600);
 }
 
-int count = 0;
+int count = 990;
 void loop()
 {
+  static uint32_t previousSecond = millis();
+
   displayDigit(count);
-  delay(1000);
-  count = (count + 1) % 10;
+
+  if (millis() - previousSecond >= 100)
+  {
+    previousSecond = millis();
+
+    count = (count + 1) % 10000;
+    Serial.println(count);
+  }
 }
 
 void displayDigit(int number)
 {
   const int digitSegments[][7] = {
-      {1, 1, 1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1, 1, 0}, // Define segments for digits 0-9
       {0, 1, 1, 0, 0, 0, 0},
       {1, 1, 0, 1, 1, 0, 1},
       {1, 1, 1, 1, 0, 0, 1},
@@ -34,8 +55,48 @@ void displayDigit(int number)
       {1, 1, 1, 1, 1, 1, 1},
       {1, 1, 1, 1, 0, 1, 1}};
 
-  for (int i = 0; i < 7; i++)
+  for (int i = TOTAL_DIGITS - 1; i >= 0; i--)
   {
-    digitalWrite(segments[i], digitSegments[number][i]);
+    byte digitNumber = getDigit(number, i);
+
+    turnOffAllDigits();
+
+    if (i == 0)
+    {
+      Serial.println();
+      Serial.println();
+    }
+
+    for (unsigned int j = 0; j < TOTAL_SEGMENTS; j++)
+    {
+      digitalWrite(segments[j], digitSegments[digitNumber][j]);
+    }
+
+    digitalWrite(digits[i], i == 3 || number / (int)pow(10, 3 - i) > 0 ? LOW : HIGH);
+  }
+}
+
+byte getDigit(int number, int position)
+{
+  String binaryString = String(number);
+
+  while (binaryString.length() != 4)
+  {
+    binaryString = "0" + binaryString;
+  }
+
+  char digitChar = binaryString[position];
+  byte digitValue = digitChar - '0';
+
+  Serial.print(digitValue);
+
+  return digitValue;
+}
+
+void turnOffAllDigits()
+{
+  for (unsigned int j = 0; j < sizeof(digits) / sizeof(digits[0]); j++)
+  {
+    digitalWrite(digits[j], HIGH);
   }
 }
