@@ -3,6 +3,7 @@
 #define BITSIZE 14
 #define TOTAL_DIGITS 4
 #define TOTAL_SEGMENTS 7
+#define MAX_COUNT (int)pow(10, TOTAL_DIGITS)
 
 int segments[] = {12, 11, 10, 9, 8, 7, 6};
 int digits[] = {A1, A2, A3, A4};
@@ -25,7 +26,7 @@ void setup()
   Serial.begin(9600);
 }
 
-int count = 1980;
+int count = 0;
 void loop()
 {
   static uint32_t previousSecond = millis();
@@ -36,7 +37,7 @@ void loop()
   {
     previousSecond = millis();
 
-    count = (count + 1) % 10000;
+    count = (count + 1) % MAX_COUNT;
     Serial.println(count);
   }
 }
