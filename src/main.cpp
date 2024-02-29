@@ -3,14 +3,17 @@
 #define BITSIZE 14
 #define TOTAL_DIGITS 4
 #define TOTAL_SEGMENTS 7
-#define MAX_COUNT 10000
+#define MAX_COUNT power(10, TOTAL_DIGITS)
 
 int segments[] = {12, 11, 10, 9, 8, 7, 6};
 int digits[] = {A1, A2, A3, A4};
 
+int count = 0;
+
 void displayDigit(int number);
 void disableDisplay();
 int power(int base, int exponent);
+bool clockTick(uint32_t ticks);
 
 void setup()
 {
@@ -27,17 +30,12 @@ void setup()
   Serial.begin(9600);
 }
 
-int count = 1090;
 void loop()
 {
-  static uint32_t previousSecond = millis();
-
   displayDigit(count);
 
-  if (millis() - previousSecond >= 100)
+  if (clockTick(100))
   {
-    previousSecond = millis();
-
     count = (count + 1) % MAX_COUNT;
   }
 }
@@ -62,7 +60,7 @@ void displayDigit(int number)
 
     disableDisplay();
 
-    digitalWrite(digits[i], i == TOTAL_DIGITS - 1 || number / int(power(10, TOTAL_DIGITS - 1 - i)) > 0 ? LOW : HIGH);
+    digitalWrite(digits[i], i == TOTAL_DIGITS - 1 || number / power(10, TOTAL_DIGITS - 1 - i) > 0 ? LOW : HIGH);
 
     for (int j = 0; j < TOTAL_SEGMENTS; j++)
     {
@@ -94,4 +92,20 @@ int power(int base, int exponent)
   }
 
   return result;
+}
+
+bool clockTick(uint32_t ticks)
+{
+  static uint32_t previousSecond = millis();
+
+  if (millis() - previousSecond >= ticks)
+  {
+    previousSecond = millis();
+
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
