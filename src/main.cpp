@@ -9,8 +9,7 @@ int segments[] = {12, 11, 10, 9, 8, 7, 6};
 int digits[] = {A1, A2, A3, A4};
 
 void displayDigit(int number);
-void turnOffAllDigits();
-void turnOffAllSegments();
+void disableDisplay();
 int power(int base, int exponent);
 
 void setup()
@@ -61,8 +60,7 @@ void displayDigit(int number)
   {
     byte digitNumber = (number / power(10, TOTAL_DIGITS - 1 - i)) % 10;
 
-    turnOffAllDigits();
-    turnOffAllSegments();
+    disableDisplay();
 
     digitalWrite(digits[i], i == TOTAL_DIGITS - 1 || number / int(power(10, TOTAL_DIGITS - 1 - i)) > 0 ? LOW : HIGH);
 
@@ -73,16 +71,13 @@ void displayDigit(int number)
   }
 }
 
-void turnOffAllDigits()
+void disableDisplay()
 {
   for (unsigned int i = 0; i < TOTAL_DIGITS; i++)
   {
     digitalWrite(digits[i], HIGH);
   }
-}
 
-void turnOffAllSegments()
-{
   for (unsigned int i = 0; i < TOTAL_SEGMENTS; i++)
   {
     digitalWrite(segments[i], LOW);
