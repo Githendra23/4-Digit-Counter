@@ -1,13 +1,17 @@
 #include <Arduino.h>
 
-#define TOTAL_SEGMENTS 7
+#define BITSIZE 14
 #define TOTAL_DIGITS 4
+#define TOTAL_SEGMENTS 7
+#define MAX_COUNT 10000
 
 int segments[] = {12, 11, 10, 9, 8, 7, 6};
 int digits[] = {A1, A2, A3, A4};
 
 void displayDigit(int number);
 void turnOffAllDigits();
+void turnOffAllSegments();
+int power(int base, int exponent);
 
 void setup()
 {
@@ -20,10 +24,11 @@ void setup()
   {
     pinMode(digits[i], OUTPUT);
   }
+
   Serial.begin(9600);
 }
 
-int count = 80;
+int count = 1090;
 void loop()
 {
   static uint32_t previousSecond = millis();
@@ -34,8 +39,7 @@ void loop()
   {
     previousSecond = millis();
 
-    count = (count + 1) % 10000;
-    // Serial.println(count); // Commented out for optimization
+    count = (count + 1) % MAX_COUNT;
   }
 }
 
@@ -55,23 +59,44 @@ void displayDigit(int number)
 
   for (int i = TOTAL_DIGITS - 1; i >= 0; i--)
   {
-    byte digitNumber = (number / int(pow(10, TOTAL_DIGITS - 1 - i))) % 10;
+    byte digitNumber = (number / power(10, TOTAL_DIGITS - 1 - i)) % 10;
 
     turnOffAllDigits();
+    turnOffAllSegments();
+
+    digitalWrite(digits[i], i == TOTAL_DIGITS - 1 || number / int(power(10, TOTAL_DIGITS - 1 - i)) > 0 ? LOW : HIGH);
 
     for (int j = 0; j < TOTAL_SEGMENTS; j++)
     {
       digitalWrite(segments[j], digitSegments[digitNumber][j]);
     }
-
-    digitalWrite(digits[i], i == TOTAL_DIGITS - 1 || number / int(pow(10, TOTAL_DIGITS - 1 - i)) > 0 ? LOW : HIGH);
   }
 }
 
 void turnOffAllDigits()
 {
-  for (int j = 0; j < TOTAL_DIGITS; j++)
+  for (unsigned int i = 0; i < TOTAL_DIGITS; i++)
   {
-    digitalWrite(digits[j], HIGH);
+    digitalWrite(digits[i], HIGH);
   }
+}
+
+void turnOffAllSegments()
+{
+  for (unsigned int i = 0; i < TOTAL_SEGMENTS; i++)
+  {
+    digitalWrite(segments[i], LOW);
+  }
+}
+
+int power(int base, int exponent)
+{
+  int result = 1;
+
+  for (int i = 0; i < exponent; i++)
+  {
+    result *= base;
+  }
+
+  return result;
 }
